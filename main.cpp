@@ -99,7 +99,7 @@ void DisplayMenu();
 void PrintToBackOrderFile(const SalesOrder& order, std::ofstream &backOrderFile);
 void DisplayBackOrderFile();
 
-static const std::string INPUT_INVENTORY_FILE{"C:\\Users\\Shanti\\Desktop\\in_inventory.txt"}, INPUT_ORDERS_FILE{"C:\\Users\\Shanti\\Desktop\\in_orders.txt"}, BACK_ORDER_FILE{"C:\\Users\\Shanti\\Desktop\\out_backOrder.txt"};
+static const std::string INPUT_INVENTORY_FILE{"in_inventory.txt"}, INPUT_ORDERS_FILE{"in_orders.txt"}, BACK_ORDER_FILE{"out_backOrder.txt"};
 
 static const double rushStatusMarkup[static_cast<int>(RushStatusTier::SIZE)]{0, 0.68, 0.45, 0.38};
 static const std::string rushStatusStrs[static_cast<int>(RushStatusTier::SIZE)]{"", "Extreme", "Expedite", "Standard"};
