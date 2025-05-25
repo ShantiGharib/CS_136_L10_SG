@@ -12,4 +12,4 @@ int sum=0;
 * data should be displayed in a table format with column headings whenever possible; text entries should be left aligned; and numerical entries should be right aligned with the same number of decimal places: $$ amount should have 2 or 4 decimal places -2
 * display error: markup % is 0.68? -2
 * rule of three?  -10
-
+* resubmit by 6/8/25
