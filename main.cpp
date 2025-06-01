@@ -35,7 +35,7 @@ public:
     
     ~Inventory();
 
-    Inventory operator=(const Inventory& source);
+    void operator=(const Inventory& source);
     void LoadFromFile();
     int GetIdIdx(const std::string& id) const;
     void DisplayDetails() const;
@@ -65,7 +65,7 @@ public:
 
     ~SalesOrder();
 
-    SalesOrder operator=(const SalesOrder& source);
+    void operator=(const SalesOrder& source);
     bool operator<(const SalesOrder& rhs) const;
     bool operator>(const SalesOrder& rhs) const;
     bool operator<=(const SalesOrder& rhs) const;
@@ -97,7 +97,7 @@ public:
 
     ~PriorityQueue();
 
-    PriorityQueue operator=(const PriorityQueue& source);
+    void operator=(const PriorityQueue& source);
     void ProcessOrders(Inventory& onHand);
     bool AddOrderToQueue(const SalesOrder& source);
     inline const SalesOrder& Top() const;
@@ -119,6 +119,8 @@ static const double rushStatusMarkup[static_cast<int>(RushStatusTier::SIZE)]{0, 
 static const std::string rushStatusStrs[static_cast<int>(RushStatusTier::SIZE)]{"", "Extreme", "Expedite", "Standard"};
 
 int main() {
+
+    std::cout << std::fixed << std::setprecision(2);
 
     enum { INVENTORY_DETAILS = 1, DISPLAY_ORDERS, PROCESS_ORDERS, QUIT };
     int option{0};
@@ -176,14 +178,13 @@ Inventory::Inventory(const Inventory& source) {
     operator=(source);
 }
 
-Inventory Inventory::operator=(const Inventory& source) {
+void Inventory::operator=(const Inventory& source) {
     if (this != &source) {
         for (int i = 0; i < MAX_SIZE; ++i) {
             items[i] = source.items[i];
         }
         currSize = source.currSize;
     }
-    return *this;
 }
 
 Inventory::~Inventory() {}
@@ -232,14 +233,13 @@ SalesOrder::SalesOrder(const SalesOrder& source) {
     operator=(source);
 }
 
-SalesOrder SalesOrder::operator=(const SalesOrder& source) {
+void SalesOrder::operator=(const SalesOrder& source) {
     if (this != &source) {
         itemId = source.itemId;
         orderNumber = source.orderNumber;
         quantity = source.quantity;
         rushStatus = source.rushStatus;
     }
-    return *this;
 }
 
 SalesOrder::~SalesOrder() {}
@@ -253,11 +253,11 @@ void SalesOrder::OutputOrder(Inventory& onHand, double& markupValue, double& rev
         cost = revenue - markupValue;
     }
     outStream
-        << std::setw(15) << orderNumber << "|"
+        << std::setw(15) << orderNumber << "|" << std::left
         << std::setw(15) << itemId << "|"
-        << std::setw(15) << rushStatusStrs[rushStatus] << "|"
+        << std::setw(15) << rushStatusStrs[rushStatus] << "|" << std::right
         << std::setw(20) << quantity << "|"
-        << std::setw(15) << rushStatusMarkup[rushStatus] << "|"
+        << std::setw(14) << rushStatusMarkup[rushStatus] * 100 << "%|"
         << std::setw(15) << markupValue << "|"
         << std::setw(15) << revenue << "|"
         << std::setw(20) << cost << "|\n";
@@ -298,7 +298,7 @@ PriorityQueue::PriorityQueue(const PriorityQueue& source) {
     operator=(source);
 }
 
-PriorityQueue PriorityQueue::operator=(const PriorityQueue& source) {
+void PriorityQueue::operator=(const PriorityQueue& source) {
     if (this != &source) {
         PriorityQueue temp;
         if (temp.ReserveMemory(source.currSize)) {
@@ -315,7 +315,6 @@ PriorityQueue PriorityQueue::operator=(const PriorityQueue& source) {
             std::cerr << "Could not properly duplicate the source priority queue. The destination queue will be left unmodified\n";
         }
     }
-    return *this;
 }
 
 PriorityQueue::~PriorityQueue() {
@@ -372,7 +371,6 @@ bool PriorityQueue::AllocateMoreMemory() {
     }
     catch (std::bad_alloc) {
         std::cout << "Not enough Continguous Memory Space to add more elements\n";
-        DeallocateMemory(pTemp);
     }
     return state;
 }
@@ -387,7 +385,6 @@ bool PriorityQueue::ReserveMemory(size_t numOfItems) {
             success = (temp.pHeap != nullptr);
         }
         catch (std::bad_alloc) {
-            DeallocateMemory(temp.pHeap);
             std::cerr << "Could not Reserve Requested Memory Size\n";
         }
         if (success) {
