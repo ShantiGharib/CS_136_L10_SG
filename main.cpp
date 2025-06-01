@@ -131,7 +131,6 @@ int main() {
     PriorityQueue salesOrders;
 
     while (option != QUIT) {
-        std::cout << std::fixed << std::setprecision(2);
         DisplayMenu();
         std::cin >> option;
 
@@ -218,8 +217,9 @@ int Inventory::GetIdIdx(const std::string& id) const {
     return matchIdx;
 }
 void Inventory::DisplayDetails() const {
-    std::cout << std::left << std::setw(15) << "Item Id" << "|" << std::setw(15) << "Item Name" << "|" << std::setw(15) << "Quantity" << "|" << std::setw(15) << "Price" << "|" << std::right << "\n";
-    std::cout << std::setfill('-') << std::setw(64) << "" << std::setfill(' ') << "\n";
+    std::cout << std::left << std::setw(15) << "Item Id" << "|" << std::setw(15) << "Item Name" << "|" 
+        << std::setw(15) << "Quantity" << "|" << std::setw(15) << "Price" << "|\n" << std::right
+        << std::setfill('-') << std::setw(64) << "" << std::setfill(' ') << "\n";
     for (int idx = 0; idx < MAX_SIZE; ++idx) {
         std::cout << std::left << std::setw(15) << items[idx].id << "|" << std::setw(15) << items[idx].name << "|" << std::setw(15) << std::right << items[idx].quantity << "|" << std::setw(15) << items[idx].price << "|\n";
     }
@@ -468,6 +468,7 @@ void PriorityQueue::ProcessOrders(Inventory& onHand) {
             {
                 double totalCost{0}, totalRevenue{0}, totalMarkup{0};
                 std::ostringstream processedData;
+                processedData << std::fixed << std::setprecision(2);
                 while (!maxHeap.IsEmpty()) {
                     const SalesOrder top{maxHeap.Top()};
                     maxHeap.Pop();
@@ -636,15 +637,15 @@ void DisplayMenu() {
 //3
 //Order Number   |Item Name      |Rush Status    |Quantity Ordered    |Markup %       |Markup Value   |Revenue        |Manufacturer Cost   |
 //------------------------------------------------------------------------------------------------------------------------------------------
-//              1|         AS34DF|        Extreme|                   6|           0.68|        566.263|           1399|              832.74|
-//              5|         AY34DF|        Extreme|                   3|           0.68|        815.898|        2015.75|             1199.85|
-//              6|         AS34DF|        Extreme|                   4|           0.68|        377.509|        932.669|              555.16|
-//             10|         AY34DF|        Extreme|                   6|           0.68|         1631.8|         4031.5|              2399.7|
-//              9|         AR34DF|       Expedite|                  12|           0.45|        4751.73|        15311.1|             10559.4|
-//              7|         AP34DF|       Standard|                   5|           0.38|        5312.31|        19292.1|             13979.8|
-//              8|         AQ34DF|       Standard|                   3|           0.38|        22799.9|        82799.8|             59999.9|
+//              1|AS34DF         |Extreme        |                   6|         68.00%|         566.26|        1399.00|              832.74|
+//              5|AY34DF         |Extreme        |                   3|         68.00%|         815.90|        2015.75|             1199.85|
+//              6|AS34DF         |Extreme        |                   4|         68.00%|         377.51|         932.67|              555.16|
+//             10|AY34DF         |Extreme        |                   6|         68.00%|        1631.80|        4031.50|             2399.70|
+//              9|AR34DF         |Expedite       |                  12|         45.00%|        4751.73|       15311.13|            10559.40|
+//              7|AP34DF         |Standard       |                   5|         38.00%|        5312.31|       19292.06|            13979.75|
+//              8|AQ34DF         |Standard       |                   3|         38.00%|       22799.94|       82799.79|            59999.85|
 //------------------------------------------------------------------------------------------------------------------------------------------
-//                                                                                             36255.4|         125782|             89526.5|
+//                                                                                            36255.44|      125781.89|            89526.45|
 //
 //
 //Back-Orders:
