@@ -31,8 +31,13 @@ private:
     SalesItem items[MAX_SIZE];
 public:
     Inventory();
+    Inventory(const Inventory& source);
+    
+    ~Inventory();
+
+    Inventory operator=(const Inventory& source);
     void LoadFromFile();
-    int GetIdIdx(const std::string &id) const;
+    int GetIdIdx(const std::string& id) const;
     void DisplayDetails() const;
 
     friend SalesOrder;
@@ -56,16 +61,21 @@ private:
 
 public:
     SalesOrder();
+    SalesOrder(const SalesOrder& source);
+
+    ~SalesOrder();
+
+    SalesOrder operator=(const SalesOrder& source);
     bool operator<(const SalesOrder& rhs) const;
     bool operator>(const SalesOrder& rhs) const;
     bool operator<=(const SalesOrder& rhs) const;
     bool operator>=(const SalesOrder& rhs) const;
     bool operator==(const SalesOrder& rhs) const;
     bool operator!=(const SalesOrder& rhs) const;
-    void OutputOrder(Inventory &onHand, double &markupValue, double &revenue, double &cost, std::ostream& outStream) const;
-    
+    void OutputOrder(Inventory& onHand, double& markupValue, double& revenue, double& cost, std::ostream& outStream) const;
+
     friend PriorityQueue;
-    friend void PrintToBackOrderFile(const SalesOrder &order, std::ofstream &backOrderFile);
+    friend void PrintToBackOrderFile(const SalesOrder& order, std::ofstream& backOrderFile);
     friend void DisplayBackOrderFile();
 };
 
@@ -73,30 +83,34 @@ class PriorityQueue {
 private:
     static constexpr const int GROWTH_FACTOR{2};
     SalesOrder* pHeap{nullptr};
-    enum {MIN = 0, MAX = 1};
+    enum { MIN = 0, MAX = 1 };
     bool minOrMax{MIN};
     size_t currSize{0}, maxSize{0};
     bool Heapify(int idx);
     inline bool AvailableSpace() const;
     bool AllocateMoreMemory();
-    void DeallocateMemory(SalesOrder* &pContainer);
+    void DeallocateMemory(SalesOrder*& pContainer);
 
 public:
-    void ProcessOrders(Inventory &onHand);
+    PriorityQueue();
+    PriorityQueue(const PriorityQueue& source);
+
+    ~PriorityQueue();
+
+    PriorityQueue operator=(const PriorityQueue& source);
+    void ProcessOrders(Inventory& onHand);
+    bool AddOrderToQueue(const SalesOrder& source);
     inline const SalesOrder& Top() const;
     void Pop();
     inline bool IsEmpty() const;
     void DisplayOrders() const;
-    PriorityQueue();
-    ~PriorityQueue();
-
-    bool AddOrderToQueue(const SalesOrder &source);
+    bool ReserveMemory(size_t numOfItems);
 };
 
 
 void HandleDefaultMenuCase();
 void DisplayMenu();
-void PrintToBackOrderFile(const SalesOrder& order, std::ofstream &backOrderFile);
+void PrintToBackOrderFile(const SalesOrder& order, std::ofstream& backOrderFile);
 void DisplayBackOrderFile();
 
 static const std::string INPUT_INVENTORY_FILE{"in_inventory.txt"}, INPUT_ORDERS_FILE{"in_orders.txt"}, BACK_ORDER_FILE{"out_backOrder.txt"};
@@ -120,41 +134,59 @@ int main() {
         std::cin >> option;
 
         switch (option) {
-        
+
             case INVENTORY_DETAILS: {
                 salesInventory.DisplayDetails();
                 break;
             }
-            
+
             case DISPLAY_ORDERS: {
                 salesOrders.DisplayOrders();
                 break;
             }
-            
+
             case PROCESS_ORDERS: {
                 salesOrders.ProcessOrders(salesInventory);
                 break;
             }
-            
+
             case QUIT: {
                 std::cout << "\nProgram now closed...\n";
                 break;
             }
-            
+
             default: {
                 HandleDefaultMenuCase();
                 break;
             }
-        
+
         }
 
     }
+
+    return EXIT_SUCCESS;
 
 }
 
 
 
 Inventory::Inventory() {}
+
+Inventory::Inventory(const Inventory& source) {
+    operator=(source);
+}
+
+Inventory Inventory::operator=(const Inventory& source) {
+    if (this != &source) {
+        for (int i = 0; i < MAX_SIZE; ++i) {
+            items[i] = source.items[i];
+        }
+        currSize = source.currSize;
+    }
+    return *this;
+}
+
+Inventory::~Inventory() {}
 
 void Inventory::LoadFromFile() {
     std::ifstream inputData(INPUT_INVENTORY_FILE);
@@ -175,7 +207,7 @@ void Inventory::LoadFromFile() {
     }
 }
 
-int Inventory::GetIdIdx(const std::string &id) const {
+int Inventory::GetIdIdx(const std::string& id) const {
     int matchIdx{-1};
     for (int i = 0; matchIdx == -1 && i < currSize; ++i) {
         if (id == items[i].id) {
@@ -196,7 +228,23 @@ void Inventory::DisplayDetails() const {
 
 SalesOrder::SalesOrder() {}
 
-void SalesOrder::OutputOrder(Inventory &onHand, double &markupValue, double &revenue, double &cost, std::ostream& outStream) const {
+SalesOrder::SalesOrder(const SalesOrder& source) {
+    operator=(source);
+}
+
+SalesOrder SalesOrder::operator=(const SalesOrder& source) {
+    if (this != &source) {
+        itemId = source.itemId;
+        orderNumber = source.orderNumber;
+        quantity = source.quantity;
+        rushStatus = source.rushStatus;
+    }
+    return *this;
+}
+
+SalesOrder::~SalesOrder() {}
+
+void SalesOrder::OutputOrder(Inventory& onHand, double& markupValue, double& revenue, double& cost, std::ostream& outStream) const {
     const int QUANTITY_IDX = onHand.GetIdIdx(itemId);
     if (QUANTITY_IDX >= 0) {
         const double price = onHand.items[QUANTITY_IDX].price;
@@ -204,7 +252,7 @@ void SalesOrder::OutputOrder(Inventory &onHand, double &markupValue, double &rev
         revenue = price * quantity + markupValue;
         cost = revenue - markupValue;
     }
-    outStream 
+    outStream
         << std::setw(15) << orderNumber << "|"
         << std::setw(15) << itemId << "|"
         << std::setw(15) << rushStatusStrs[rushStatus] << "|"
@@ -246,6 +294,30 @@ bool SalesOrder::operator!=(const SalesOrder& rhs) const {
 
 PriorityQueue::PriorityQueue() {}
 
+PriorityQueue::PriorityQueue(const PriorityQueue& source) {
+    operator=(source);
+}
+
+PriorityQueue PriorityQueue::operator=(const PriorityQueue& source) {
+    if (this != &source) {
+        PriorityQueue temp;
+        if (temp.ReserveMemory(source.currSize)) {
+            for (int i = 0; i < source.currSize; ++i) {
+                temp.pHeap[i] = source.pHeap[i];
+            }
+            DeallocateMemory(pHeap);
+            pHeap = temp.pHeap;
+            temp.pHeap = nullptr;
+            currSize = maxSize = source.currSize;
+            minOrMax = source.minOrMax;
+        }
+        else {
+            std::cerr << "Could not properly duplicate the source priority queue. The destination queue will be left unmodified\n";
+        }
+    }
+    return *this;
+}
+
 PriorityQueue::~PriorityQueue() {
     currSize = maxSize = 0;
     DeallocateMemory(pHeap);
@@ -272,7 +344,7 @@ bool PriorityQueue::Heapify(int idx) {
 
     if (leftChild < currSize) {
         const int MAX_GAIN_CHILD = (rightChild < currSize && (minOrMax == MIN && pHeap[rightChild] <= pHeap[leftChild]) || (minOrMax == MAX && pHeap[rightChild] >= pHeap[leftChild])) ? rightChild : leftChild;
-        
+
         if ((minOrMax == MIN && pHeap[idx] > pHeap[MAX_GAIN_CHILD]) || (minOrMax == MAX && pHeap[idx] < pHeap[MAX_GAIN_CHILD])) {
             const SalesOrder temp = pHeap[MAX_GAIN_CHILD];
             pHeap[MAX_GAIN_CHILD] = pHeap[idx];
@@ -305,7 +377,33 @@ bool PriorityQueue::AllocateMoreMemory() {
     return state;
 }
 
-void PriorityQueue::DeallocateMemory(SalesOrder* &pContainer) {
+bool PriorityQueue::ReserveMemory(size_t numOfItems) {
+    bool success{true};
+    if (numOfItems > currSize) {
+        PriorityQueue temp;
+        success = false;
+        try {
+            temp.pHeap = new SalesOrder[numOfItems];
+            success = (temp.pHeap != nullptr);
+        }
+        catch (std::bad_alloc) {
+            DeallocateMemory(temp.pHeap);
+            std::cerr << "Could not Reserve Requested Memory Size\n";
+        }
+        if (success) {
+            for (int i = 0; i < currSize; ++i) {
+                temp.pHeap[i] = pHeap[i];
+            }
+            DeallocateMemory(pHeap);
+            pHeap = temp.pHeap;
+            temp.pHeap = nullptr;
+            maxSize = numOfItems;
+        }
+    }
+    return success;
+}
+
+void PriorityQueue::DeallocateMemory(SalesOrder*& pContainer) {
     if (pContainer != nullptr) {
         delete[] pContainer;
         pContainer = nullptr;
@@ -317,20 +415,20 @@ inline bool PriorityQueue::AvailableSpace() const {
 }
 
 
-void PriorityQueue::ProcessOrders(Inventory &onHand) {
+void PriorityQueue::ProcessOrders(Inventory& onHand) {
     static std::string header;
     if (header.empty()) {
         std::ostringstream heading;
-        heading << std::left 
-                << std::setw(15) << "Order Number" << "|" 
-                << std::setw(15) << "Item Name" << "|" 
-                << std::setw(15) << "Rush Status" << "|"
-                << std::setw(20) << "Quantity Ordered" << "|"
-                << std::setw(15) << "Markup %" << "|" 
-                << std::setw(15) << "Markup Value" << "|" 
-                << std::setw(15) << "Revenue" << "|"
-                << std::setw(20) << "Manufacturer Cost" << "|\n"
-                << std::setfill('-') << std::setw(138) << "" << std::setfill(' ') << std::right << "\n";
+        heading << std::left
+            << std::setw(15) << "Order Number" << "|"
+            << std::setw(15) << "Item Name" << "|"
+            << std::setw(15) << "Rush Status" << "|"
+            << std::setw(20) << "Quantity Ordered" << "|"
+            << std::setw(15) << "Markup %" << "|"
+            << std::setw(15) << "Markup Value" << "|"
+            << std::setw(15) << "Revenue" << "|"
+            << std::setw(20) << "Manufacturer Cost" << "|\n"
+            << std::setfill('-') << std::setw(138) << "" << std::setfill(' ') << std::right << "\n";
         header = heading.str();
     }
     static std::string outMessage;
@@ -347,7 +445,7 @@ void PriorityQueue::ProcessOrders(Inventory &onHand) {
                 maxHeaps[i].minOrMax = MAX;
             }
             int quantities[onHand.MAX_SIZE]{};
-        
+
             SalesOrder order;
             while (ordersFile >> order.orderNumber >> order.itemId >> order.quantity >> order.rushStatus) {
                 const int QUANTITY_IDX = onHand.GetIdIdx(order.itemId);
@@ -374,7 +472,7 @@ void PriorityQueue::ProcessOrders(Inventory &onHand) {
                 double totalCost{0}, totalRevenue{0}, totalMarkup{0};
                 std::ostringstream processedData;
                 while (!maxHeap.IsEmpty()) {
-                    const SalesOrder top{maxHeap.Top()};                    
+                    const SalesOrder top{maxHeap.Top()};
                     maxHeap.Pop();
                     double markupValue{0}, revenue{0}, cost{0};
 
@@ -384,7 +482,7 @@ void PriorityQueue::ProcessOrders(Inventory &onHand) {
                     totalMarkup += markupValue;
                 }
                 processedData << std::setfill('-') << std::setw(138) << "" << std::setfill(' ') << std::right << "\n"
-                << std::setw(85) << "" << std::setw(15) << totalMarkup << "|" << std::setw(15) << totalRevenue << "|" << std::setw(20) << totalCost << "|\n";
+                    << std::setw(85) << "" << std::setw(15) << totalMarkup << "|" << std::setw(15) << totalRevenue << "|" << std::setw(20) << totalCost << "|\n";
                 outMessage = processedData.str();
 
                 ordersFile.open(INPUT_ORDERS_FILE, std::ios_base::in | std::ios_base::out | std::ios_base::trunc);
@@ -437,7 +535,7 @@ inline bool PriorityQueue::IsEmpty() const {
 
 
 
-void PrintToBackOrderFile(const SalesOrder &order, std::ofstream &backOrderFile) {
+void PrintToBackOrderFile(const SalesOrder& order, std::ofstream& backOrderFile) {
     backOrderFile << order.orderNumber << " " << order.itemId << " " << order.quantity << " " << order.rushStatus << "\n";
 }
 
